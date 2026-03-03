@@ -1,0 +1,16 @@
+# OpenClaw 工作区文件
+.openclaw/
+AGENTS.md
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
+RD_EXEC_SANITY.txt
+
+# 旧版本（只保留 v0.5）
+幻界-mvp/v0.1/
+幻界-mvp/v0.2/
+幻界-mvp/v0.3/
+幻界-mvp/v0.4/
