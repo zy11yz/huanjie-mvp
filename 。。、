@@ -1,0 +1,52 @@
+# 一、项目介绍
+<quote-container>
+此模板适用于规划以季度、年度为时间维度的中长期项目
+</quote-container>
+
+## **1.1 项目背景**
+<quote-container>
+@<mention-doc token="NBIcwF6uzioEWQkuwiyciuC1nTf" type="wiki">幻界 产品设计方案</mention-doc>
+</quote-container>
+
+
+## **1.2 核心成员与项目群组**
+
+<lark-table rows="3" cols="2" column-widths="258,435">
+
+  <lark-tr>
+    <lark-td>
+      **核心成员** {align="center"}
+    </lark-td>
+    <lark-td>
+      **项目角色与负责事项** {align="center"}
+    </lark-td>
+  </lark-tr>
+  <lark-tr>
+    <lark-td>
+      <text color="gray"><mention-user id="ou_aa7ee968f1077ba44e20f918a3ea7ac4"/></text><text color="gray">（技术）</text> {align="center"}
+    </lark-td>
+    <lark-td>
+      负责前端开发、规则引擎实现、AI交互开发、手机适配
+    </lark-td>
+  </lark-tr>
+  <lark-tr>
+    <lark-td>
+      <mention-user id="ou_24327f5873625ea0a1b5cfe30c13259d"/>（策划） {align="center"}
+    </lark-td>
+    <lark-td>
+      负责产品定位、系统功能设计、内容输出配置、各项杂活
+    </lark-td>
+  </lark-tr>
+</lark-table>
+
+
+# 二、项目目标
+<quote-container>
+项目目标指在项目规划之初设定的项目总体目标。项目目标应该是被清晰定义的、可实现的且可测量的项目成功标准
+</quote-container>
+
+<callout emoji="seedling" background-color="light-green" border-color="light-green">
+**目标 1：2026/2/28 确定项目设计方案及项目规划**
+**目标 2：2026/3/31 推出第一个可供游玩的版本**
+
+</callout>
