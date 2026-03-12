@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>幻界规则引擎 - 演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #e94560;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #888;
+      margin-bottom: 30px;
+    }
+    
+    .section {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      color: #0f3460;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    input, select, button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    input, select {
+      background: #0f3460;
+      color: #eee;
+      min-width: 120px;
+    }
+    
+    button {
+      background: #e94560;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #ff6b6b;
+    }
+    
+    .result {
+      background: #0f3460;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    .success {
+      color: #4ecca3;
+    }
+    
+    .failure {
+      color: #e94560;
+    }
+    
+    .info {
+      color: #7ec8e3;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    @media (max-width: 600px) {
+      .input-group {
+        flex-direction: column;
+      }
+      
+      input, select, button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 幻界规则引擎演示</h1>
+  <p class="subtitle">基于《判定系统设计规范》实现 | 纯前端运行</p>
+  
+  <div class="grid">
+    <!-- 掷骰系统 -->
+    <div class="section">
+      <h2>🎲 掷骰系统</h2>
+      <div class="input-group">
+        <input type="text" id="diceNotation" placeholder="2d6+3" value="d20">
+        <button onclick="rollDice()">掷骰</button>
+      </div>
+      <div class="input-group">
+        <button onclick="rollWithAdvantage()">优势</button>
+        <button onclick="rollWithDisadvantage()">劣势</button>
+      </div>
+      <div id="diceResult" class="result">点击按钮开始掷骰...</div>
+    </div>
+    
+    <!-- 攻击检定 -->
+    <div class="section">
+      <h2>⚔️ 攻击检定</h2>
+      <div class="input-group">
+        <input type="number" id="attackBonus" placeholder="攻击加值" value="5">
+        <input type="number" id="targetAC" placeholder="目标AC" value="15">
+        <button onclick="attackCheck()">攻击</button>
+      </div>
+      <div id="attackResult" class="result">输入参数后点击攻击...</div>
+    </div>
+    
+    <!-- 技能检定 -->
+    <div class="section">
+      <h2>🎯 技能检定</h2>
+      <div class="input-group">
+        <input type="number" id="skillBonus" placeholder="技能加值" value="3">
+        <input type="number" id="skillDC" placeholder="DC" value="12">
+        <button onclick="skillCheck()">检定</button>
+      </div>
+      <div id="skillResult" class="result">输入参数后点击检定...</div>
+    </div>
+    
+    <!-- 属性计算 -->
+    <div class="section">
+      <h2>📊 属性计算</h2>
+      <div class="input-group">
+        <input type="number" id="abilityScore" placeholder="属性值" value="16">
+        <button onclick="calculateModifier()">计算修正</button>
+      </div>
+      <div class="input-group">
+        <input type="number" id="characterLevel" placeholder="等级" value="5">
+        <button onclick="calculateProficiency()">熟练加值</button>
+      </div>
+      <div id="abilityResult" class="result">输入参数后点击计算...</div>
+    </div>
+    
+    <!-- 完整攻击 -->
+    <div class="section">
+      <h2>⚔️💥 完整攻击流程</h2>
+      <div class="input-group">
+        <input type="number" id="fullAttackBonus" placeholder="攻击加值" value="6">
+        <input type="number" id="fullTargetAC" placeholder="目标AC" value="14">
+        <input type="text" id="damageDice" placeholder="伤害骰" value="1d8">
+        <input type="number" id="damageMod" placeholder="伤害修正" value="3">
+        <button onclick="fullAttack()">执行攻击</button>
+      </div>
+      <div id="fullAttackResult" class="result">输入参数后执行完整攻击...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import RuleEngine from './src/engine/RuleEngine.js';
+    
+    // 创建全局规则引擎实例
+    window.engine = new RuleEngine();
+    
+    // 掷骰
+    window.rollDice = () => {
+      const notation = document.getElementById('diceNotation').value || 'd20';
+      try {
+        const result = window.engine.roll(notation);
+        displayResult('diceResult', result);
+      } catch (error) {
+        displayError('diceResult', error.message);
+      }
+    };
+    
+    // 优势掷骰
+    window.rollWithAdvantage = () => {
+      const notation = document.getElementById('diceNotation').value || 'd20';
+      try {
+        const result = window.engine.rollWithAdvantage(notation);
+        displayResult('diceResult', result, '优势掷骰');
+      } catch (error) {
+        displayError('diceResult', error.message);
+      }
+    };
+    
+    // 劣势掷骰
+    window.rollWithDisadvantage = () => {
+      const notation = document.getElementById('diceNotation').value || 'd20';
+      try {
+        const result = window.engine.rollWithDisadvantage(notation);
+        displayResult('diceResult', result, '劣势掷骰');
+      } catch (error) {
+        displayError('diceResult', error.message);
+      }
+    };
+    
+    // 攻击检定
+    window.attackCheck = () => {
+      const attackBonus = parseInt(document.getElementById('attackBonus').value) || 0;
+      const targetAC = parseInt(document.getElementById('targetAC').value) || 10;
+      
+      const result = window.engine.attackCheck({ attackBonus, targetAC });
+      displayResult('attackResult', result, result.isSuccess ? '命中！' : '未命中');
+    };
+    
+    // 技能检定
+    window.skillCheck = () => {
+      const skillBonus = parseInt(document.getElementById('skillBonus').value) || 0;
+      const dc = parseInt(document.getElementById('skillDC').value) || 10;
+      
+      const result = window.engine.skillCheck({ skillBonus, dc });
+      displayResult('skillResult', result, result.isSuccess ? '成功！' : '失败');
+    };
+    
+    // 计算属性修正
+    window.calculateModifier = () => {
+      const score = parseInt(document.getElementById('abilityScore').value) || 10;
+      const modifier = window.engine.calculateAbilityModifier(score);
+      
+      document.getElementById('abilityResult').innerHTML = 
+        `<span class="info">属性值: ${score}</span>\n` +
+        `<span class="success">修正值: ${modifier >= 0 ? '+' : ''}${modifier}</span>`;
+    };
+    
+    // 计算熟练加值
+    window.calculateProficiency = () => {
+      const level = parseInt(document.getElementById('characterLevel').value) || 1;
+      const bonus = window.engine.calculateProficiencyBonus(level);
+      
+      document.getElementById('abilityResult').innerHTML = 
+        `<span class="info">角色等级: ${level}</span>\n` +
+        `<span class="success">熟练加值: +${bonus}</span>`;
+    };
+    
+    // 完整攻击
+    window.fullAttack = () => {
+      const attackBonus = parseInt(document.getElementById('fullAttackBonus').value) || 0;
+      const targetAC = parseInt(document.getElementById('fullTargetAC').value) || 10;
+      const damageDice = document.getElementById('damageDice').value || '1d6';
+      const damageModifier = parseInt(document.getElementById('damageMod').value) || 0;
+      
+      const result = window.engine.executeAttack({
+        attackBonus,
+        targetAC,
+        damageDice,
+        damageModifier
+      });
+      
+      let html = `<span class="${result.hit ? 'success' : 'failure'}">${result.hit ? '⚔️ 命中！' : '❌ 未命中'}</span>\n\n`;
+      html += `攻击检定: ${result.attack.finalValue} vs AC ${targetAC}\n`;
+      html += `掷骰结果: [${result.attack.rawRolls.join(', ')}]\n`;
+      
+      if (result.hit && result.damage) {
+        html += `\n<span class="success">💥 伤害: ${result.totalDamage}</span>\n`;
+        html += `伤害骰: [${result.damage.rawRolls.join(', ')}] = ${result.damage.diceTotal}\n`;
+        html += `属性修正: +${damageModifier}`;
+      }
+      
+      document.getElementById('fullAttackResult').innerHTML = html;
+    };
+    
+    // 显示结果
+    function displayResult(elementId, result, summary) {
+      let html = '';
+      if (summary) {
+        html += `<span class="info">${summary}</span>\n\n`;
+      }
+      html += JSON.stringify(result, null, 2);
+      document.getElementById(elementId).textContent = '';
+      document.getElementById(elementId).innerHTML = html;
+    }
+    
+    // 显示错误
+    function displayError(elementId, message) {
+      document.getElementById(elementId).innerHTML = `<span class="failure">错误: ${message}</span>`;
+    }
+  </script>
+</body>
+</html>
